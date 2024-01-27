@@ -1,0 +1,131 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: springboot-template
+  title: Spring Boot JSON API
+  description: Create a simple microservice using Spring Boot Java with customizable JSON API
+  tags:
+    - recommended
+    - java
+    - spring-boot
+spec:
+  owner: service@example.com
+  type: service
+
+  parameters:
+    - title: Provide some simple information
+      required:
+        - getMethodBaseName
+      properties:
+        applicationBaseName:
+          title: Application Name
+          type: string
+          description: Unique name of the Spring Boot application
+          ui:field: EntityNamePicker
+        controllerClassBaseName:
+          title: Controller Class Name
+          type: string
+          description: Name for the controller class
+        getMethodBaseName:
+          title: Get Method
+          type: string
+          description: Get method's name in controller
+        mappingTemplate:
+          title: Mapping Template
+          type: string
+          description: Mapping template for the controller
+          default: dummy
+        key1:
+          title: Key 1
+          type: string
+          description: The key for the first variable in the JSON response
+          default: default_key1
+        value1:
+          title: Value 1
+          type: string
+          description: The value for the first variable in the JSON response
+          default: default_value1
+        key2:
+          title: Key 2
+          type: string
+          description: The key for the second variable in the JSON response
+          default: default_key2
+        value2:
+          title: Value 2
+          type: string
+          description: The value for the second variable in the JSON response
+          default: default_value2
+        key3:
+          title: Key 3
+          type: string
+          description: The key for the third variable in the JSON response
+          default: default_key3
+        value3:
+          title: Value 3
+          type: string
+          description: The value for the third variable in the JSON response
+          default: default_value3
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+    - title: Choose a location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        copyWithoutRender:
+          - .github/workflows/*
+        values:
+          applicationBaseName: ${{ parameters.applicationBaseName }}
+          controllerClassBaseName: ${{ parameters.controllerClassBaseName }}
+          mappingTemplate: ${{ parameters.mappingTemplate }}
+          key1: ${{ parameters.key1 }}
+          value1: ${{ parameters.value1 }}
+          key2: ${{ parameters.key2 }}
+          value2: ${{ parameters.value2 }}
+          key3: ${{ parameters.key3 }}
+          value3: ${{ parameters.value3 }}
+          owner: ${{ parameters.owner }}
+          destination: ${{ parameters.repoUrl | parseRepoUrl }}
+          http_port: 8080
+
+    - id: publish
+      name: Publish
+      action: publish:github:pull-request
+      input:
+        allowedHosts: ["github.com"]
+        description: This is ${{ parameters.applicationBaseName }} JSON API
+        repoUrl: ${{ parameters.repoUrl }}
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
