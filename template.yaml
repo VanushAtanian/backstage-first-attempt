@@ -112,7 +112,7 @@ spec:
       action: publish:github:pull-request
       input:
         allowedHosts: ["github.com"]
-        branchName: main
+        branchName: backstage-created
         title: Test creating PR from template
         description: This is ${{ parameters.applicationBaseName }} JSON API
         repoUrl: ${{ parameters.repoUrl }}
