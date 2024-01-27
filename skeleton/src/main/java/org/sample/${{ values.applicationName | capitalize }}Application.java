@@ -10,5 +10,3 @@ public class $ {{ values.applicationBaseName | capitalize }}Application{
         SpringApplication.run(${{ values.applicationBaseName | capitalize }}Application.class, args);
     }
 }
-
-// some change
